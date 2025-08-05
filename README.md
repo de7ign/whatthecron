@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤯 WhatTheCron
 
-## Getting Started
+Ever stared at a cron expression like `*/15 9-17 * * MON-FRI` and whispered to yourself:
 
-First, run the development server:
+> “**What the CRON is this supposed to do?**”
+
+Yeah, same.
+
+**WhatTheCron** is a clean, modern, mildly dramatic visualizer + explainer for your cryptic cron schedules.  
+No BS. Just type it in, and instantly see **what’s going on**.
+
+[🚀 Try it live](https://whatthecron.vercel.app)
+
+---
+
+## 🧠 Wait, what does this do?
+
+Paste in a cron string, and you'll get:
+
+- 🔍 A **human-readable explanation** (you won’t need a second monitor and Stack Overflow)
+- 🕒 A list of **upcoming run times**
+- 💡 A breakdown of **each field** with smart highlights
+- 🎨 A slick UI that doesn't look like it's from 2006
+- 🌘 Dark mode. Obviously.
+
+---
+
+## 🖼 Screenshot
+
+> “Show me the goods.”
+
+*(Add a screenshot here once you’ve got one. Or don’t. I’m not your boss.)*
+
+---
+
+## 🧪 Can I break it?
+
+Yes. Go ahead. Type `* * * * walrus` and see what happens.
+
+You’ll get **helpful error messages**, because even bad cron deserves love.
+
+---
+
+## 🧰 Tech Stuff (aka How the sausage is made)
+
+- **Next.js** – Because pages are nice
+- **TailwindCSS** – So I never touch a stylesheet again
+
+---
+
+## 🧩 Features I might add if I don’t get lazy
+
+- [ ] English → Cron (Reverse mode. Magic stuff.)
+- [ ] Export to `.ics`, bash, or a tattoo
+- [ ] Save your favorite crons like a Spotify playlist
+- [ ] Widget/embed mode for Notion, Docs, etc.
+
+---
+
+## 🛠 Local Dev (if you're nosy)
 
 ```bash
+git clone https://github.com/de7ign/whatthecron.git
+cd whatthecron
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+````
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then go to [http://localhost:3000](http://localhost:3000) and break stuff responsibly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🙃 Who made this?
 
-## Learn More
+Hi. I’m [Nihal](https://nihalmurmu.com).
+I built this mostly to make cron jobs suck less.
+If it helped you, **drop a ⭐**. Or don’t. I’ll live.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🪪 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT. Because sharing is caring.
