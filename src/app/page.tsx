@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Github, Info, Clock, Calendar, Hash, Star, Zap } from "lucide-react"
 
 export default function Home() {
-  const [cronExpression, setCronExpression] = useState("")
+  const [cronExpression, setCronExpression] = useState("*/15 9-17 * * MON-FRI")
   const [parsedResult, setParsedResult] = useState<any>(null)
   const [timezone, setTimezone] = useState("UTC")
 
