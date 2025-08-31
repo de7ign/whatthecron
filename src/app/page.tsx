@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Github, Info, Clock, Calendar, Hash, Star, Zap } from "lucide-react"
+import cronstrue from 'cronstrue';
+import { CronExpression, CronExpressionParser } from 'cron-parser';
 
 export default function Home() {
   const [cronExpression, setCronExpression] = useState("*/15 9-17 * * MON-FRI")
@@ -17,12 +19,45 @@ export default function Home() {
   const parseCronExpression = (expression: string) => {
     // Simple cron parser for demo purposes
     const parts = expression.trim().split(/\s+/)
-    if (parts.length !== 5) {
-      setParsedResult({ error: "Invalid cron expression. Must have 5 fields." })
+    if (!(parts.length === 5 || parts.length === 6)) {
+      setParsedResult({ error: "Invalid cron expression. Must have 5 or 6 fields." })
       return
     }
 
-    const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
+    const finalParts = parts.length === 5 ? ['0', ...parts] : parts
+    const finalExpression = finalParts.join(' ')
+
+    // validate using cron-parser
+    try {
+      const interval = CronExpressionParser.parse(finalExpression, { strict: true });
+
+      const fields = generateFieldDescription(finalParts);
+      const humanReadable = generateHumanReadable(finalExpression)
+      const nextRuns = generateNextRuns(interval)
+
+      setParsedResult({
+        fields,
+        humanReadable,
+        nextRuns,
+      })
+
+    } catch (e) {
+      setParsedResult({ error: "Error parsing cron expression." })
+      console.error(e)
+      return
+    }
+  }
+
+  const generateFieldDescription = (parts: string[]) => {
+    const getFieldDescription = (field: string, value: string) => {
+      if (value === "*") return "Every value"
+      if (value.includes("/")) return `Every ${value.split("/")[1]} ${field}(s)`
+      if (value.includes("-")) return `From ${value.split("-")[0]} to ${value.split("-")[1]}`
+      if (value.includes(",")) return `On ${value.replace(/,/g, ", ")}`
+      return `At ${value}`
+    }
+
+    const [second, minute, hour, dayOfMonth, month, dayOfWeek] = parts
 
     const fieldExplanations = [
       { field: "Minute", value: minute, description: getFieldDescription("minute", minute) },
@@ -32,48 +67,32 @@ export default function Home() {
       { field: "Day of Week", value: dayOfWeek, description: getFieldDescription("dayOfWeek", dayOfWeek) },
     ]
 
-    const humanReadable = generateHumanReadable(parts)
-    const nextRuns = generateNextRuns()
-
-    setParsedResult({
-      fields: fieldExplanations,
-      humanReadable,
-      nextRuns,
-    })
-  }
-
-  const getFieldDescription = (field: string, value: string) => {
-    if (value === "*") return "Every value"
-    if (value.includes("/")) return `Every ${value.split("/")[1]} ${field}(s)`
-    if (value.includes("-")) return `From ${value.split("-")[0]} to ${value.split("-")[1]}`
-    if (value.includes(",")) return `On ${value.replace(/,/g, ", ")}`
-    return `At ${value}`
-  }
-
-  const generateHumanReadable = (parts: string[]) => {
-
-    return "Coming Soon!";
-
-    // const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
-
-    // if (minute === "0" && hour === "0" && dayOfMonth === "*" && month === "*" && dayOfWeek === "*") {
-    //   return "Every day at midnight"
-    // }
-    // if (minute === "*/15" && hour === "9-17" && dayOfMonth === "*" && month === "*" && dayOfWeek === "MON-FRI") {
-    //   return "Every 15 minutes during business hours (9 AM to 5 PM) on weekdays"
-    // }
-    // return "Custom schedule - see field breakdown above"
-  }
-
-  const generateNextRuns = () => {
-    const now = new Date()
-    const runs = []
-    for (let i = 0; i < 5; i++) {
-      const nextRun = new Date(now.getTime() + (i + 1) * 15 * 60 * 1000) // Mock: every 15 minutes
-      // runs.push(nextRun.toLocaleString())
-      runs.push("Coming Soon!") // Placeholder for actual next run times
+    if (second !== '0') {
+      fieldExplanations.unshift({ field: "Second", value: second, description: getFieldDescription("second", second) })
     }
-    return runs
+
+    return fieldExplanations;
+  }
+
+
+  const generateHumanReadable = (expression: string) => {
+    return cronstrue.toString(expression, { use24HourTimeFormat: true });
+  }
+
+  const generateNextRuns = (interval: CronExpression) => {
+
+    return interval.take(5).map(date => {
+
+      return date.toDate().toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      })
+    });
   }
 
   return (
