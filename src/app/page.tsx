@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,11 +10,65 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Github, Info, Clock, Calendar, Hash, Star, Zap } from "lucide-react"
 import cronstrue from 'cronstrue';
 import { CronExpression, CronExpressionParser } from 'cron-parser';
+import { getTimeZones, TimeZone } from '@vvo/tzdb';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function Home() {
+  const isFirstRender = useRef(true);
   const [cronExpression, setCronExpression] = useState("*/15 9-17 * * MON-FRI")
   const [parsedResult, setParsedResult] = useState<any>(null)
-  const [timezone, setTimezone] = useState("UTC")
+  const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
+  const [timezone, setTimezone] = useState(getDefaultTimeZone());
+
+  useEffect(() => {
+
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    // Re-parse cron expression when timezone changes
+    if (cronExpression.trim()) {
+      parseCronExpression(cronExpression);
+    }
+  }, [timezone]);
+
+  function formatTimeZoneLabel(tz: TimeZone) {
+
+    const offsetMinutes = tz.currentTimeOffsetInMinutes;
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absMinutes = Math.abs(offsetMinutes);
+    const hours = Math.floor(absMinutes / 60).toString().padStart(2, '0');
+    const minutes = (absMinutes % 60).toString().padStart(2, '0');
+    const offset = `UTC${sign}${hours}:${minutes}`;
+
+    const city = tz.name;
+    return `${offset} ${city} - ${tz.alternativeName}`;
+  }
+
+
+  function getTimeZoneOptions() {
+    const zones = getTimeZones();
+    // Deduplicate by group leader only
+    const uniqueZones = zones.filter((z) => z.group[0] === z.name);
+
+    // Sort by UTC offset
+    uniqueZones.sort((a, b) => a.currentTimeOffsetInMinutes - b.currentTimeOffsetInMinutes);
+
+    return uniqueZones.map((tz) => ({
+      value: tz.name, // e.g. "America/New_York"
+      label: formatTimeZoneLabel(tz),
+    }));
+  }
+
+  const timeZoneOptions = getTimeZoneOptions();
+
+  function getDefaultTimeZone() {
+    const zones = getTimeZones();
+    const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const found = zones.find(tz => tz.name === currentTZ || tz.group.includes(currentTZ));
+    return found ? found.name : "UTC";
+  }
 
   const parseCronExpression = (expression: string) => {
     // Simple cron parser for demo purposes
@@ -29,7 +83,7 @@ export default function Home() {
 
     // validate using cron-parser
     try {
-      const interval = CronExpressionParser.parse(finalExpression, { strict: true });
+      const interval = CronExpressionParser.parse(finalExpression, { strict: true, tz: timezone });
 
       const fields = generateFieldDescription(finalParts);
       const humanReadable = generateHumanReadable(finalExpression)
@@ -90,7 +144,7 @@ export default function Home() {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: false,
+        hour12: false
       })
     });
   }
@@ -221,9 +275,23 @@ export default function Home() {
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold text-gray-900">Next Run Times</h4>
-                        <Button variant="link" className="text-green-500 p-0">
-                          Change Timezone ({timezone})
-                        </Button>
+
+                        <Select value={timezone}
+                          onValueChange={(value) => setTimezone(value)}
+                          open={showTimezoneDropdown}
+                          onOpenChange={setShowTimezoneDropdown}>
+                          <SelectTrigger className="bg-transparent hover:bg-transparent text-green-500 p-0 border-0 shadow-none font-medium">
+                            <SelectValue>Change Timezone ({timezone})</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="z-50 overflow-y-auto">
+                            {timeZoneOptions.map((tz) => (
+                              <SelectItem key={tz.value} value={tz.value}>
+                                {tz.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
                       </div>
                       <div className="space-y-2">
                         {parsedResult.nextRuns.map((time: string, index: number) => (
