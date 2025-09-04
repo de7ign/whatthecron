@@ -13,6 +13,7 @@ import { CronExpression, CronExpressionParser } from 'cron-parser';
 import { getTimeZones, TimeZone } from '@vvo/tzdb';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useTheme } from "next-themes"
+import Link from "next/link"
 
 export default function Home() {
   const isFirstRender = useRef(true);
@@ -178,8 +179,10 @@ export default function Home() {
                 </Button>)
               }
 
-              <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                <Github className="h-5 w-5" />
+              <Button asChild variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                <Link href="https://github.com/de7ign/whatthecron" target="_blank">
+                  <Github className="h-5 w-5" />
+                </Link>
               </Button>
             </nav>
           </div>
