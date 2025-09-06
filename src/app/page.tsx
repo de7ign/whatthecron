@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Github, Info, Clock, Calendar, Hash, Star, Zap, Sun, Moon } from "lucide-react"
+import { Github, Info, Clock, Calendar, Hash, Star, Zap, Sun, Moon, Box } from "lucide-react"
 import cronstrue from 'cronstrue';
 import { CronExpression, CronExpressionParser } from 'cron-parser';
 import { getTimeZones, TimeZone } from '@vvo/tzdb';
@@ -367,11 +367,32 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
+                      <Box className="h-5 w-5 text-green-500 mt-0.5" />
+                      <div>
+                        <p className="font-medium dark:text-white">
+                          Some systems (Quartz, Spring, etc.) support 6 fields with {" "}
+                          <code className="bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded font-mono">seconds</code>
+                          {" "} at the start
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
                       <Star className="h-5 w-5 text-green-500 mt-0.5" />
                       <div>
                         <p className="font-medium dark:text-white">
-                          Fields range from 0-59 (minutes), 0-23 (hours), 1-31 (days), 1-12 (months), 0-7 (weekdays)
+                          Fields ranges:
                         </p>
+                        <ul
+                          role="list"
+                          className="list-disc pl-5 mt-2 text-sm text-gray-700 dark:text-gray-300 space-y-1 marker:text-gray-400 dark:marker:text-gray-500"
+                        >
+                          <li>Seconds: 0–59 <span className="italic">(if supported)</span></li>
+                          <li>Minutes: 0–59</li>
+                          <li>Hours: 0–23</li>
+                          <li>Day of Month: 1–31</li>
+                          <li>Month: 1–12 <span className="italic">(or JAN–DEC)</span></li>
+                          <li>Day of Week: 0–7 <span className="italic">(0 and 7 = Sunday, or SUN–SAT)</span></li>
+                        </ul>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -428,6 +449,30 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
+                    <div className="flex items-start gap-3">
+                      <div className="font-mono bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded text-sm">?</div>
+                      <div>
+                        <p className="font-medium dark:text-white">
+                          “no specific value” (only in Quartz, for day/month fields)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="font-mono bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded text-sm">L</div>
+                      <div>
+                        <p className="font-medium dark:text-white">
+                          “last” (e.g. last day of month, or last weekday)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="font-mono bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded text-sm">#</div>
+                      <div>
+                        <p className="font-medium dark:text-white">
+                          “nth weekday” (e.g. 2#1 = first Monday of the month)
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -461,6 +506,18 @@ export default function Home() {
                         <p className="font-medium dark:text-white">First day of every month at midnight</p>
                       </div>
                     </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded font-mono text-sm">0 0 12 25 12</code>
+                      <div>
+                        <p className="font-medium dark:text-white">Every Christman at noon</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded font-mono text-sm">0 */10 * * * *</code>
+                      <div>
+                        <p className="font-medium dark:text-white">Every 10 minutes at 0 seconds (if supported)</p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -474,7 +531,7 @@ export default function Home() {
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                       <div>
                         <p className="font-medium dark:text-white">
-                          Don't use both day-of-month and day-of-week unless you want OR logic
+                          Using both day-of-month and day-of-week: it’s OR logic, not AND
                         </p>
                       </div>
                     </div>
@@ -482,20 +539,40 @@ export default function Home() {
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                       <div>
                         <p className="font-medium dark:text-white">
-                          Remember that months are 1-12, not 0-11 like in some programming languages
+                          Forgetting that months are 1–12, not 0–11
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                       <div>
-                        <p className="font-medium dark:text-white">Be careful with timezone differences in production environments</p>
+                        <p className="font-medium dark:text-white">
+                          Confusing Sunday as 0 vs 7 (both are valid in many systems)
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                       <div>
-                        <p className="font-medium dark:text-white">Test your cron expressions before deploying to production</p>
+                        <p className="font-medium dark:text-white">Assuming all systems support seconds (many only use 5 fields)</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div>
+                        <p className="font-medium dark:text-white">Not accounting for <b>timezone differences</b> in production</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div>
+                        <p className="font-medium dark:text-white">Forgetting DST changes if you schedule in a local timezone</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div>
+                        <p className="font-medium dark:text-white">Not testing your cron expression before deploying</p>
                       </div>
                     </div>
                   </div>
