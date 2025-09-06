@@ -4,31 +4,28 @@
 module.exports = {
   semi: true,
   singleQuote: true,
-  trailingComma: "es5",
+  trailingComma: 'es5',
   tabWidth: 2,
   printWidth: 100,
   bracketSpacing: true,
-  arrowParens: "always",
+  arrowParens: 'always',
   singleAttributePerLine: true,
 
   // Plugins
-  plugins: [
-    "prettier-plugin-tailwindcss",
-    "@ianvs/prettier-plugin-sort-imports",
-  ],
+  plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
 
   // Import sorting rules
   importOrder: [
-    "^react$",
-    "^next",
-    "<THIRD_PARTY_MODULES>",
-    "",
-    "^@/components/(.*)$",
-    "^@/lib/(.*)$",
-    "^@/hooks/(.*)$",
-    "^@/styles/(.*)$",
-    "",
-    "^[./]"
+    '^react$',
+    '^next',
+    '<THIRD_PARTY_MODULES>',
+    '',
+    '^@/components/(.*)$',
+    '^@/lib/(.*)$',
+    '^@/hooks/(.*)$',
+    '^@/styles/(.*)$',
+    '',
+    '^[./]',
   ],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
