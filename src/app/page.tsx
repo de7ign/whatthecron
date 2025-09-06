@@ -11,14 +11,27 @@ import { Github, Info, Clock, Calendar, Hash, Star, Zap, Sun, Moon, Box } from "
 import cronstrue from 'cronstrue';
 import { CronExpression, CronExpressionParser } from 'cron-parser';
 import { getTimeZones, TimeZone } from '@vvo/tzdb';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useTheme } from "next-themes"
 import Link from "next/link"
+
+
+interface ParsedResultField {
+  field: string;
+  value: string;
+  description: string;
+}
+interface ParsedResult {
+  fields?: ParsedResultField[];
+  humanReadable?: string;
+  nextRuns?: string[];
+  error?: string;
+}
 
 export default function Home() {
   const isFirstRender = useRef(true);
   const [cronExpression, setCronExpression] = useState("*/15 9-17 * * MON-FRI")
-  const [parsedResult, setParsedResult] = useState<any>(null)
+  const [parsedResult, setParsedResult] = useState<ParsedResult | undefined>(undefined)
   const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
   const [timezone, setTimezone] = useState(getDefaultTimeZone());
   const { resolvedTheme, setTheme } = useTheme()
@@ -29,6 +42,7 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  
   useEffect(() => {
 
     if (isFirstRender.current) {
@@ -40,6 +54,8 @@ export default function Home() {
     if (cronExpression.trim()) {
       parseCronExpression(cronExpression);
     }
+    // disabling exhaustive-deps because we only want to run this effect when timezone changes
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timezone]);
 
   function formatTimeZoneLabel(tz: TimeZone) {
@@ -81,22 +97,22 @@ export default function Home() {
 
   const parseCronExpression = (expression: string) => {
     // Simple cron parser for demo purposes
-    const parts = expression.trim().split(/\s+/)
+    const parts: string[] = expression.trim().split(/\s+/)
     if (!(parts.length === 5 || parts.length === 6)) {
       setParsedResult({ error: "Invalid cron expression. Must have 5 or 6 fields." })
       return
     }
 
-    const finalParts = parts.length === 5 ? ['0', ...parts] : parts
-    const finalExpression = finalParts.join(' ')
+    const finalParts: string[] = parts.length === 5 ? ['0', ...parts] : parts
+    const finalExpression: string = finalParts.join(' ')
 
     // validate using cron-parser
     try {
-      const interval = CronExpressionParser.parse(finalExpression, { strict: true, tz: timezone });
+      const interval: CronExpression = CronExpressionParser.parse(finalExpression, { strict: true, tz: timezone });
 
-      const fields = generateFieldDescription(finalParts);
-      const humanReadable = generateHumanReadable(finalExpression)
-      const nextRuns = generateNextRuns(interval)
+      const fields: ParsedResultField[] = generateFieldDescription(finalParts);
+      const humanReadable: string = generateHumanReadable(finalExpression)
+      const nextRuns: string[] = generateNextRuns(interval)
 
       setParsedResult({
         fields,
@@ -111,7 +127,7 @@ export default function Home() {
     }
   }
 
-  const generateFieldDescription = (parts: string[]) => {
+  const generateFieldDescription = (parts: string[]): ParsedResultField[] => {
     const getFieldDescription = (field: string, value: string) => {
       if (value === "*") return "Every value"
       if (value.includes("/")) return `Every ${value.split("/")[1]} ${field}(s)`
@@ -157,6 +173,7 @@ export default function Home() {
       })
     });
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
@@ -261,7 +278,7 @@ export default function Home() {
                     <div>
                       <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Field Breakdown</h4>
                       <div className="space-y-2">
-                        {parsedResult.fields.map((field: any, index: number) => (
+                        {parsedResult.fields?.map((field: ParsedResultField, index: number) => (
                           <div
                             key={index}
                             className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
@@ -319,7 +336,7 @@ export default function Home() {
 
                       </div>
                       <div className="space-y-2">
-                        {parsedResult.nextRuns.map((time: string, index: number) => (
+                        {parsedResult.nextRuns?.map((time: string, index: number) => (
                           <div key={index} className="flex items-center gap-3 p-2 bg-green-50 dark:bg-green-900/20 rounded">
                             <Calendar className="h-4 w-4 text-green-500" />
                             <span className="font-mono text-sm dark:text-gray-300">{time}</span>
