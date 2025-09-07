@@ -743,6 +743,109 @@ export default function Home() {
           </Tabs>
         </div>
       </section>
+
+      <footer className="border-t border-gray-300 bg-white px-4 py-12 font-sans transition-colors sm:px-6 lg:px-8 dark:border-gray-600 dark:bg-gray-900">
+        <div className="mx-auto max-w-4xl">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {/* Project Info */}
+            <div>
+              <h4 className="mb-4 font-mono text-lg font-bold">WhatTheCron</h4>
+              <p className="mb-4 text-sm font-medium text-gray-700 dark:text-gray-200">
+                Because remembering cron syntax is harder than writing it.
+              </p>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h5 className="mb-4 font-semibold">Links</h5>
+              <div className="space-y-2">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                >
+                  <Link
+                    href="https://github.com/de7ign/whatthecron"
+                    target="_blank"
+                  >
+                    GitHub Repository
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                >
+                  <Link
+                    target="_blank"
+                    href="https://github.com/de7ign/whatthecron/issues"
+                  >
+                    Report Issues
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                >
+                  <Link
+                    target="_blank"
+                    href="https://github.com/de7ign/whatthecron/issues"
+                  >
+                    Feature Requests
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h5 className="mb-4 font-semibold">Connect</h5>
+              <div className="space-y-2">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                >
+                  <Link
+                    target="_blank"
+                    href="https://github.com/de7ign"
+                  >
+                    GitHub Profile
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                >
+                  <Link
+                    target="_blank"
+                    href="https://x.com/dzndev"
+                  >
+                    Twitter/X
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-gray-800 pt-8 text-center">
+            <Link
+              className="text-sm"
+              target="_blank"
+              href="https://github.com/de7ign/whatthecron"
+            >
+              Like this project? Support it by ⭐ing on GitHub or submitting your suggestions
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
