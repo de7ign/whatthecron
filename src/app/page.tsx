@@ -190,15 +190,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 transition-colors dark:bg-gray-900">
+    <div className="bg-background min-h-screen transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-white shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-800">
+      <header className="border-border bg-background sticky top-0 z-50 border-b shadow-sm transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
-              <h1 className="font-mono text-2xl font-bold text-gray-900 dark:text-white">
-                WhatTheCron
-              </h1>
+              <h1 className="text-foreground font-mono text-2xl font-bold">WhatTheCron</h1>
             </div>
             <nav className="flex items-center space-x-6">
               {mounted && (
@@ -206,7 +204,6 @@ export default function Home() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                  className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 >
                   {resolvedTheme === 'dark' ? (
                     <Sun className="h-5 w-5" />
@@ -215,12 +212,10 @@ export default function Home() {
                   )}
                 </Button>
               )}
-
               <Button
                 asChild
                 variant="ghost"
                 size="sm"
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 <Link
                   href="https://github.com/de7ign/whatthecron"
@@ -237,17 +232,17 @@ export default function Home() {
       {/* Hero Section */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mb-6 text-4xl font-bold text-gray-900 sm:text-5xl lg:text-6xl dark:text-white">
+          <h2 className="text-foreground mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
             Ever looked at a cron job and thought…{' '}
             <span className="text-purple-500">what the cron?</span> 🤯
           </h2>
-          <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600 dark:text-gray-300">
+          <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
             Instantly decode, explain, and preview your cron schedules.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button
               size="lg"
-              className="bg-green-500 px-8 py-3 text-white hover:bg-green-600"
+              className="px-8 py-3"
               onClick={() =>
                 document.getElementById('tool')?.scrollIntoView({ behavior: 'smooth' })
               }
@@ -258,7 +253,7 @@ export default function Home() {
             <Button
               variant="outline"
               size="lg"
-              className="bg-transparent px-8 py-3 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+              className="px-8 py-3"
               onClick={() =>
                 document.getElementById('learn')?.scrollIntoView({ behavior: 'smooth' })
               }
@@ -276,9 +271,7 @@ export default function Home() {
       >
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 text-center">
-            <h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-              Enter a cron expression
-            </h3>
+            <h3 className="text-foreground mb-2 text-2xl font-bold">Enter a cron expression</h3>
           </div>
 
           <div className="mb-8 flex flex-col gap-4 sm:flex-row">
@@ -286,11 +279,11 @@ export default function Home() {
               placeholder="*/15 9-17 * * MON-FRI"
               value={cronExpression}
               onChange={(e) => setCronExpression(e.target.value)}
-              className="flex-1 p-4 font-mono text-lg dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="flex-1 p-4 font-mono text-lg"
             />
             <Button
               onClick={() => parseCronExpression(cronExpression)}
-              className="bg-green-500 px-8 text-white hover:bg-green-600"
+              className="px-8"
               disabled={!cronExpression.trim()}
             >
               Parse
@@ -298,41 +291,39 @@ export default function Home() {
           </div>
 
           {parsedResult && (
-            <Card className="shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            <Card className="bg-card shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 dark:text-white">
-                  <Clock className="h-5 w-5 text-green-500" />
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="text-primary h-5 w-5" />
                   Cron Expression Breakdown
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {parsedResult.error ? (
-                  <div className="font-medium text-red-600">{parsedResult.error}</div>
+                  <div className="text-destructive font-medium">{parsedResult.error}</div>
                 ) : (
                   <>
                     {/* Field Breakdown */}
                     <div>
-                      <h4 className="mb-3 font-semibold text-gray-900 dark:text-white">
-                        Field Breakdown
-                      </h4>
+                      <h4 className="text-foreground mb-3 font-semibold">Field Breakdown</h4>
                       <div className="space-y-2">
                         {parsedResult.fields?.map((field: ParsedResultField, index: number) => (
                           <div
                             key={index}
-                            className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700"
+                            className="bg-accent flex items-center justify-between rounded-lg p-3"
                           >
                             <div className="flex items-center gap-3">
                               <Badge
                                 variant="outline"
-                                className="font-mono dark:border-gray-600 dark:text-gray-300"
+                                className="font-mono"
                               >
                                 {field.value}
                               </Badge>
-                              <span className="font-medium dark:text-white">{field.field}</span>
+                              <span className="font-medium">{field.field}</span>
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <Info className="h-4 w-4 text-gray-400" />
+                                    <Info className="h-4 w-4" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>{field.description}</p>
@@ -340,9 +331,7 @@ export default function Home() {
                                 </Tooltip>
                               </TooltipProvider>
                             </div>
-                            <span className="text-gray-600 dark:text-gray-300">
-                              {field.description}
-                            </span>
+                            <span>{field.description}</span>
                           </div>
                         ))}
                       </div>
@@ -350,9 +339,7 @@ export default function Home() {
 
                     {/* Human Readable */}
                     <div>
-                      <h4 className="mb-2 font-semibold text-gray-900 dark:text-gray-300">
-                        Human-Readable Summary
-                      </h4>
+                      <h4 className="text-foreground mb-2 font-semibold">Human-Readable Summary</h4>
                       <p className="rounded-lg bg-purple-50 p-4 text-lg font-medium text-purple-600 dark:bg-purple-900/20 dark:text-purple-300">
                         {parsedResult.humanReadable}
                       </p>
@@ -361,9 +348,7 @@ export default function Home() {
                     {/* Next Run Times */}
                     <div>
                       <div className="mb-3 flex items-center justify-between">
-                        <h4 className="font-semibold text-gray-900 dark:text-white">
-                          Next Run Times
-                        </h4>
+                        <h4 className="text-foreground font-semibold">Next Run Times</h4>
 
                         <Select
                           value={timezone}
@@ -371,14 +356,15 @@ export default function Home() {
                           open={showTimezoneDropdown}
                           onOpenChange={setShowTimezoneDropdown}
                         >
-                          <SelectTrigger className="hover:bg-accent border-0 bg-transparent py-2 font-medium text-green-500 shadow-none dark:bg-transparent dark:hover:bg-gray-700">
+                          <SelectTrigger className="hover:bg-accent text-primary border-0 bg-transparent py-2 font-medium shadow-none">
                             <SelectValue>Change Timezone ({timezone})</SelectValue>
                           </SelectTrigger>
-                          <SelectContent className="z-50 overflow-y-auto">
+                          <SelectContent className="bg-popover text-popover-foreground z-50 overflow-y-auto">
                             {timeZoneOptions.map((tz) => (
                               <SelectItem
                                 key={tz.value}
                                 value={tz.value}
+                                className="text-foreground"
                               >
                                 {tz.label}
                               </SelectItem>
@@ -392,8 +378,8 @@ export default function Home() {
                             key={index}
                             className="flex items-center gap-3 rounded bg-green-50 p-2 dark:bg-green-900/20"
                           >
-                            <Calendar className="h-4 w-4 text-green-500" />
-                            <span className="font-mono text-sm dark:text-gray-300">{time}</span>
+                            <Calendar className="text-primary h-4 w-4" />
+                            <span className="text-foreground font-mono text-sm">{time}</span>
                           </div>
                         ))}
                       </div>
@@ -409,57 +395,35 @@ export default function Home() {
       {/* Learn More Section */}
       <section
         id="learn"
-        className="bg-white px-4 py-16 transition-colors sm:px-6 lg:px-8 dark:bg-gray-800"
+        className="bg-background px-4 py-16 transition-colors sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-4xl">
-          <h3 className="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            Cron Cheatsheet
-          </h3>
+          <h3 className="text-foreground mb-8 text-center text-3xl font-bold">Cron Cheatsheet</h3>
 
           <Tabs
             defaultValue="basics"
             className="w-full"
           >
-            <TabsList className="grid h-auto w-full grid-cols-2 gap-2 border-2 sm:grid-cols-4 dark:bg-gray-700">
-              <TabsTrigger
-                value="basics"
-                className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white"
-              >
-                Basics
-              </TabsTrigger>
-              <TabsTrigger
-                value="special"
-                className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white"
-              >
-                Special Characters
-              </TabsTrigger>
-              <TabsTrigger
-                value="examples"
-                className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white"
-              >
-                Examples
-              </TabsTrigger>
-              <TabsTrigger
-                value="mistakes"
-                className="dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white"
-              >
-                Common Mistakes
-              </TabsTrigger>
+            <TabsList className="border-border bg-accent grid h-auto w-full grid-cols-2 gap-2 border-2 sm:grid-cols-4">
+              <TabsTrigger value="basics">Basics</TabsTrigger>
+              <TabsTrigger value="special">Special Characters</TabsTrigger>
+              <TabsTrigger value="examples">Examples</TabsTrigger>
+              <TabsTrigger value="mistakes">Common Mistakes</TabsTrigger>
             </TabsList>
 
             <TabsContent
               value="basics"
               className="mt-6"
             >
-              <Card className="dark:border-gray-700 dark:bg-gray-800">
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <Hash className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Cron format:{' '}
-                          <code className="rounded bg-gray-100 px-2 py-1 font-mono dark:bg-gray-700 dark:text-gray-300">
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                             minute hour day month weekday
                           </code>
                         </p>
@@ -468,9 +432,9 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <Box className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Some systems (Quartz, Spring, etc.) support 6 fields with{' '}
-                          <code className="rounded bg-gray-100 px-2 py-1 font-mono dark:bg-gray-700 dark:text-gray-300">
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                             seconds
                           </code>{' '}
                           at the start
@@ -480,10 +444,10 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <Star className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
-                        <p className="font-medium dark:text-white">Fields ranges:</p>
+                        <p className="font-medium">Fields ranges:</p>
                         <ul
                           role="list"
-                          className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700 marker:text-gray-400 dark:text-gray-300 dark:marker:text-gray-500"
+                          className="mt-2 list-disc space-y-1 pl-5 text-sm marker:text-gray-400"
                         >
                           <li>
                             Seconds: 0–59 <span className="italic">(if supported)</span>
@@ -504,9 +468,9 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <Clock className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Use{' '}
-                          <code className="rounded bg-gray-100 px-2 py-1 font-mono dark:bg-gray-700 dark:text-gray-300">
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                             *
                           </code>{' '}
                           to match any value in that field
@@ -516,9 +480,7 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <Calendar className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
-                        <p className="font-medium dark:text-white">
-                          Sunday can be represented as either 0 or 7
-                        </p>
+                        <p className="font-medium">Sunday can be represented as either 0 or 7</p>
                       </div>
                     </div>
                   </div>
@@ -530,76 +492,85 @@ export default function Home() {
               value="special"
               className="mt-6"
             >
-              <Card className="dark:border-gray-700 dark:bg-gray-800">
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         *
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">Matches any value (wildcard)</p>
+                        <p className="font-medium">Matches any value (wildcard)</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         /
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">
-                          Step values - <code className="font-mono dark:text-gray-300">*/5</code>{' '}
+                        <p className="font-medium">
+                          Step values -{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            */5
+                          </code>{' '}
                           means every 5 units
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         -
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">
-                          Range - <code className="font-mono dark:text-gray-300">1-5</code> means 1
-                          through 5
+                        <p className="font-medium">
+                          Range -{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            1-5
+                          </code>{' '}
+                          means 1 through 5
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         ,
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">
-                          List - <code className="font-mono dark:text-gray-300">1,3,5</code> means
-                          1, 3, and 5
+                        <p className="font-medium">
+                          List -{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            1,3,5
+                          </code>{' '}
+                          means 1, 3, and 5
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         ?
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           “no specific value” (only in Quartz, for day/month fields)
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         L
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           “last” (e.g. last day of month, or last weekday)
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         #
-                      </div>
+                      </code>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           “nth weekday” (e.g. 2#1 = first Monday of the month)
                         </p>
                       </div>
@@ -613,59 +584,55 @@ export default function Home() {
               value="examples"
               className="mt-6"
             >
-              <Card className="dark:border-gray-700 dark:bg-gray-800">
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         0 0 * * *
                       </code>
                       <div>
-                        <p className="font-medium dark:text-white">Every day at midnight</p>
+                        <p className="font-medium">Every day at midnight</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         */15 * * * *
                       </code>
                       <div>
-                        <p className="font-medium dark:text-white">Every 15 minutes</p>
+                        <p className="font-medium">Every 15 minutes</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         0 9 * * MON-FRI
                       </code>
                       <div>
-                        <p className="font-medium dark:text-white">9 AM on weekdays</p>
+                        <p className="font-medium">9 AM on weekdays</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         0 0 1 * *
                       </code>
                       <div>
-                        <p className="font-medium dark:text-white">
-                          First day of every month at midnight
-                        </p>
+                        <p className="font-medium">First day of every month at midnight</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         0 0 12 25 12
                       </code>
                       <div>
-                        <p className="font-medium dark:text-white">Every Christman at noon</p>
+                        <p className="font-medium">Every Christman at noon</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-700 dark:text-gray-300">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
                         0 */10 * * * *
                       </code>
                       <div>
-                        <p className="font-medium dark:text-white">
-                          Every 10 minutes at 0 seconds (if supported)
-                        </p>
+                        <p className="font-medium">Every 10 minutes at 0 seconds (if supported)</p>
                       </div>
                     </div>
                   </div>
@@ -677,61 +644,59 @@ export default function Home() {
               value="mistakes"
               className="mt-6"
             >
-              <Card className="dark:border-gray-700 dark:bg-gray-800">
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Using both day-of-month and day-of-week: it’s OR logic, not AND
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
-                          Forgetting that months are 1–12, not 0–11
-                        </p>
+                        <p className="font-medium">Forgetting that months are 1–12, not 0–11</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Confusing Sunday as 0 vs 7 (both are valid in many systems)
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Assuming all systems support seconds (many only use 5 fields)
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Not accounting for <b>timezone differences</b> in production
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Forgetting DST changes if you schedule in a local timezone
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="mt-2 h-2 w-2 rounded-full bg-red-500"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium dark:text-white">
+                        <p className="font-medium">
                           Not testing your cron expression before deploying
                         </p>
                       </div>
@@ -744,100 +709,71 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-gray-300 bg-white px-4 py-12 font-sans transition-colors sm:px-6 lg:px-8 dark:border-gray-600 dark:bg-gray-900">
+      {/* Footer */}
+      <footer className="border-border bg-background border-t px-4 py-12 font-sans transition-colors sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {/* Project Info */}
             <div>
-              <h4 className="mb-4 font-mono text-lg font-bold">WhatTheCron</h4>
-              <p className="mb-4 text-sm font-medium text-gray-700 dark:text-gray-200">
+              <h4 className="text-foreground mb-4 font-mono text-lg font-bold">WhatTheCron</h4>
+              <p className="text-muted-foreground mb-4 text-sm font-medium">
                 Because remembering cron syntax is harder than writing it.
               </p>
             </div>
 
             {/* Links */}
             <div>
-              <h5 className="mb-4 font-semibold">Links</h5>
-              <div className="space-y-2">
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+              <h5 className="text-foreground mb-4 font-semibold">Links</h5>
+              <div className="space-y-3">
+                <Link
+                  href="https://github.com/de7ign/whatthecron"
+                  target="_blank"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
                 >
-                  <Link
-                    href="https://github.com/de7ign/whatthecron"
-                    target="_blank"
-                  >
-                    GitHub Repository
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                  GitHub Repository
+                </Link>
+                <Link
+                  target="_blank"
+                  href="https://github.com/de7ign/whatthecron/issues"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
                 >
-                  <Link
-                    target="_blank"
-                    href="https://github.com/de7ign/whatthecron/issues"
-                  >
-                    Report Issues
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                  Report Issues
+                </Link>
+                <Link
+                  target="_blank"
+                  href="https://github.com/de7ign/whatthecron/issues"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
                 >
-                  <Link
-                    target="_blank"
-                    href="https://github.com/de7ign/whatthecron/issues"
-                  >
-                    Feature Requests
-                  </Link>
-                </Button>
+                  Feature Requests
+                </Link>
               </div>
             </div>
 
             {/* Contact */}
             <div>
-              <h5 className="mb-4 font-semibold">Connect</h5>
-              <div className="space-y-2">
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+              <h5 className="text-foreground mb-4 font-semibold">Connect</h5>
+              <div className="space-y-3">
+                <Link
+                  target="_blank"
+                  href="https://github.com/de7ign"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
                 >
-                  <Link
-                    target="_blank"
-                    href="https://github.com/de7ign"
-                  >
-                    GitHub Profile
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="m-0 block p-0 text-gray-700 hover:bg-transparent dark:text-gray-200 dark:hover:bg-transparent dark:hover:text-white"
+                  GitHub Profile
+                </Link>
+                <Link
+                  target="_blank"
+                  href="https://x.com/dzndev"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
                 >
-                  <Link
-                    target="_blank"
-                    href="https://x.com/dzndev"
-                  >
-                    Twitter/X
-                  </Link>
-                </Button>
+                  Twitter/X
+                </Link>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 border-t border-gray-800 pt-8 text-center">
+          <div className="border-border mt-8 border-t pt-8 text-center">
             <Link
-              className="text-sm"
+              className="text-muted-foreground hover:text-foreground text-sm"
               target="_blank"
               href="https://github.com/de7ign/whatthecron"
             >
