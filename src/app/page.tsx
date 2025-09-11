@@ -350,7 +350,8 @@ export default function Home() {
                       <div className="mb-3 flex items-center justify-between">
                         <h4 className="text-foreground font-semibold">Next Run Times</h4>
 
-                        <Select
+                        {/* TODO: Handle timezone and DST*/}
+                        {/* <Select
                           value={timezone}
                           onValueChange={(value) => setTimezone(value)}
                           open={showTimezoneDropdown}
@@ -370,7 +371,7 @@ export default function Home() {
                               </SelectItem>
                             ))}
                           </SelectContent>
-                        </Select>
+                        </Select> */}
                       </div>
                       <div className="space-y-2">
                         {parsedResult.nextRuns?.map((time: string, index: number) => (
