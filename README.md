@@ -29,7 +29,7 @@ Paste in a cron string, and you'll get:
 
 > “Show me the goods.”
 
-*(Add a screenshot here once you’ve got one. Or don’t. I’m not your boss.)*
+_(Add a screenshot here once you’ve got one. Or don’t. I’m not your boss.)_
 
 ---
 
@@ -64,7 +64,7 @@ git clone https://github.com/de7ign/whatthecron.git
 cd whatthecron
 npm install
 npm run dev
-````
+```
 
 Then go to [http://localhost:3000](http://localhost:3000) and break stuff responsibly.
 

@@ -1,112 +1,228 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Github, Info, Clock, Calendar, Hash, Star, Zap } from "lucide-react"
-import cronstrue from 'cronstrue';
+import { useEffect, useRef, useState } from 'react';
+import { useTheme } from 'next-themes';
+import Link from 'next/link';
+import { getTimeZones, TimeZone } from '@vvo/tzdb';
 import { CronExpression, CronExpressionParser } from 'cron-parser';
+import cronstrue from 'cronstrue';
+import { Box, Calendar, Clock, Github, Hash, Info, Moon, Star, Sun, Zap } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+interface ParsedResultField {
+  field: string;
+  value: string;
+  description: string;
+}
+interface ParsedResult {
+  fields?: ParsedResultField[];
+  humanReadable?: string;
+  nextRuns?: string[];
+  error?: string;
+}
 
 export default function Home() {
-  const [cronExpression, setCronExpression] = useState("*/15 9-17 * * MON-FRI")
-  const [parsedResult, setParsedResult] = useState<any>(null)
-  const [timezone, setTimezone] = useState("UTC")
+  const isFirstRender = useRef(true);
+  const [cronExpression, setCronExpression] = useState('*/15 9-17 * * MON-FRI');
+  const [parsedResult, setParsedResult] = useState<ParsedResult | undefined>(undefined);
+  const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
+  const [timezone, setTimezone] = useState(getDefaultTimeZone());
+  const { resolvedTheme, setTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    // Re-parse cron expression when timezone changes
+    if (cronExpression.trim()) {
+      parseCronExpression(cronExpression);
+    }
+    // disabling exhaustive-deps because we only want to run this effect when timezone changes
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timezone]);
+
+  function formatTimeZoneLabel(tz: TimeZone) {
+    const offsetMinutes = tz.currentTimeOffsetInMinutes;
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absMinutes = Math.abs(offsetMinutes);
+    const hours = Math.floor(absMinutes / 60)
+      .toString()
+      .padStart(2, '0');
+    const minutes = (absMinutes % 60).toString().padStart(2, '0');
+    const offset = `UTC${sign}${hours}:${minutes}`;
+
+    const city = tz.name;
+    return `${offset} ${city} - ${tz.alternativeName}`;
+  }
+
+  function getTimeZoneOptions() {
+    const zones = getTimeZones();
+    // Deduplicate by group leader only
+    const uniqueZones = zones.filter((z) => z.group[0] === z.name);
+
+    // Sort by UTC offset
+    uniqueZones.sort((a, b) => a.currentTimeOffsetInMinutes - b.currentTimeOffsetInMinutes);
+
+    return uniqueZones.map((tz) => ({
+      value: tz.name, // e.g. "America/New_York"
+      label: formatTimeZoneLabel(tz),
+    }));
+  }
+
+  const timeZoneOptions = getTimeZoneOptions();
+
+  function getDefaultTimeZone() {
+    const zones = getTimeZones();
+    const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const found = zones.find((tz) => tz.name === currentTZ || tz.group.includes(currentTZ));
+    return found ? found.name : 'UTC';
+  }
 
   const parseCronExpression = (expression: string) => {
     // Simple cron parser for demo purposes
-    const parts = expression.trim().split(/\s+/)
+    const parts: string[] = expression.trim().split(/\s+/);
     if (!(parts.length === 5 || parts.length === 6)) {
-      setParsedResult({ error: "Invalid cron expression. Must have 5 or 6 fields." })
-      return
+      setParsedResult({ error: 'Invalid cron expression. Must have 5 or 6 fields.' });
+      return;
     }
 
-    const finalParts = parts.length === 5 ? ['0', ...parts] : parts
-    const finalExpression = finalParts.join(' ')
+    const finalParts: string[] = parts.length === 5 ? ['0', ...parts] : parts;
+    const finalExpression: string = finalParts.join(' ');
 
     // validate using cron-parser
     try {
-      const interval = CronExpressionParser.parse(finalExpression, { strict: true });
+      const interval: CronExpression = CronExpressionParser.parse(finalExpression, {
+        strict: true,
+        tz: timezone,
+      });
 
-      const fields = generateFieldDescription(finalParts);
-      const humanReadable = generateHumanReadable(finalExpression)
-      const nextRuns = generateNextRuns(interval)
+      const fields: ParsedResultField[] = generateFieldDescription(finalParts);
+      const humanReadable: string = generateHumanReadable(finalExpression);
+      const nextRuns: string[] = generateNextRuns(interval);
 
       setParsedResult({
         fields,
         humanReadable,
         nextRuns,
-      })
-
+      });
     } catch (e) {
-      setParsedResult({ error: "Error parsing cron expression." })
-      console.error(e)
-      return
+      setParsedResult({ error: 'Error parsing cron expression.' });
+      console.error(e);
+      return;
     }
-  }
+  };
 
-  const generateFieldDescription = (parts: string[]) => {
+  const generateFieldDescription = (parts: string[]): ParsedResultField[] => {
     const getFieldDescription = (field: string, value: string) => {
-      if (value === "*") return "Every value"
-      if (value.includes("/")) return `Every ${value.split("/")[1]} ${field}(s)`
-      if (value.includes("-")) return `From ${value.split("-")[0]} to ${value.split("-")[1]}`
-      if (value.includes(",")) return `On ${value.replace(/,/g, ", ")}`
-      return `At ${value}`
-    }
+      if (value === '*') return 'Every value';
+      if (value.includes('/')) return `Every ${value.split('/')[1]} ${field}(s)`;
+      if (value.includes('-')) return `From ${value.split('-')[0]} to ${value.split('-')[1]}`;
+      if (value.includes(',')) return `On ${value.replace(/,/g, ', ')}`;
+      return `At ${value}`;
+    };
 
-    const [second, minute, hour, dayOfMonth, month, dayOfWeek] = parts
+    const [second, minute, hour, dayOfMonth, month, dayOfWeek] = parts;
 
     const fieldExplanations = [
-      { field: "Minute", value: minute, description: getFieldDescription("minute", minute) },
-      { field: "Hour", value: hour, description: getFieldDescription("hour", hour) },
-      { field: "Day of Month", value: dayOfMonth, description: getFieldDescription("dayOfMonth", dayOfMonth) },
-      { field: "Month", value: month, description: getFieldDescription("month", month) },
-      { field: "Day of Week", value: dayOfWeek, description: getFieldDescription("dayOfWeek", dayOfWeek) },
-    ]
+      { field: 'Minute', value: minute, description: getFieldDescription('minute', minute) },
+      { field: 'Hour', value: hour, description: getFieldDescription('hour', hour) },
+      {
+        field: 'Day of Month',
+        value: dayOfMonth,
+        description: getFieldDescription('dayOfMonth', dayOfMonth),
+      },
+      { field: 'Month', value: month, description: getFieldDescription('month', month) },
+      {
+        field: 'Day of Week',
+        value: dayOfWeek,
+        description: getFieldDescription('dayOfWeek', dayOfWeek),
+      },
+    ];
 
     if (second !== '0') {
-      fieldExplanations.unshift({ field: "Second", value: second, description: getFieldDescription("second", second) })
+      fieldExplanations.unshift({
+        field: 'Second',
+        value: second,
+        description: getFieldDescription('second', second),
+      });
     }
 
     return fieldExplanations;
-  }
-
+  };
 
   const generateHumanReadable = (expression: string) => {
     return cronstrue.toString(expression, { use24HourTimeFormat: true });
-  }
+  };
 
   const generateNextRuns = (interval: CronExpression) => {
-
-    return interval.take(5).map(date => {
-
-      return date.toDate().toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
+    return interval.take(5).map((date) => {
+      return date.toDate().toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
         hour12: false,
-      })
+      });
     });
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-background min-h-screen transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <header className="border-border bg-background sticky top-0 z-50 border-b shadow-sm transition-colors">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900 font-mono">WhatTheCron</h1>
+              <h1 className="text-foreground font-mono text-2xl font-bold">WhatTheCron</h1>
             </div>
             <nav className="flex items-center space-x-6">
-              <Button variant="ghost" size="sm">
-                <Github className="h-5 w-5" />
+              {mounted && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                >
+                  {resolvedTheme === 'dark' ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+              >
+                <Link
+                  href="https://github.com/de7ign/whatthecron"
+                  target="_blank"
+                >
+                  <Github className="h-5 w-5" />
+                </Link>
               </Button>
             </nav>
           </div>
@@ -114,19 +230,22 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-            Ever looked at a cron job and thought… <span className="text-purple-500">what the cron?</span> 🤯
+      <section className="px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-foreground mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
+            Ever looked at a cron job and thought…{' '}
+            <span className="text-purple-500">what the cron?</span> 🤯
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
             Instantly decode, explain, and preview your cron schedules.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button
               size="lg"
-              className="bg-green-500 hover:bg-green-600 text-white px-8 py-3"
-              onClick={() => document.getElementById("tool")?.scrollIntoView({ behavior: "smooth" })}
+              className="px-8 py-3"
+              onClick={() =>
+                document.getElementById('tool')?.scrollIntoView({ behavior: 'smooth' })
+              }
             >
               <Zap className="mr-2 h-5 w-5" />
               Try It Now
@@ -134,8 +253,10 @@ export default function Home() {
             <Button
               variant="outline"
               size="lg"
-              className="px-8 py-3 bg-transparent"
-              onClick={() => document.getElementById("learn")?.scrollIntoView({ behavior: "smooth" })}
+              className="px-8 py-3"
+              onClick={() =>
+                document.getElementById('learn')?.scrollIntoView({ behavior: 'smooth' })
+              }
             >
               Learn Cron Syntax
             </Button>
@@ -144,58 +265,65 @@ export default function Home() {
       </section>
 
       {/* Main Tool Section */}
-      <section id="tool" className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Enter a cron expression</h3>
+      <section
+        id="tool"
+        className="px-4 py-16 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-8 text-center">
+            <h3 className="text-foreground mb-2 text-2xl font-bold">Enter a cron expression</h3>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row">
             <Input
               placeholder="*/15 9-17 * * MON-FRI"
               value={cronExpression}
               onChange={(e) => setCronExpression(e.target.value)}
-              className="flex-1 font-mono text-lg p-4"
+              className="flex-1 p-4 font-mono text-lg"
             />
             <Button
               onClick={() => parseCronExpression(cronExpression)}
-              className="bg-green-500 hover:bg-green-600 text-white px-8"
+              className="px-8"
               disabled={!cronExpression.trim()}
             >
               Parse
             </Button>
           </div>
 
-
-
           {parsedResult && (
-            <Card className="shadow-lg">
+            <Card className="bg-card shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-green-500" />
+                  <Clock className="text-primary h-5 w-5" />
                   Cron Expression Breakdown
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {parsedResult.error ? (
-                  <div className="text-red-600 font-medium">{parsedResult.error}</div>
+                  <div className="text-destructive font-medium">{parsedResult.error}</div>
                 ) : (
                   <>
                     {/* Field Breakdown */}
                     <div>
-                      <h4 className="font-semibold mb-3 text-gray-900">Field Breakdown</h4>
+                      <h4 className="text-foreground mb-3 font-semibold">Field Breakdown</h4>
                       <div className="space-y-2">
-                        {parsedResult.fields.map((field: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        {parsedResult.fields?.map((field: ParsedResultField, index: number) => (
+                          <div
+                            key={index}
+                            className="bg-accent flex items-center justify-between rounded-lg p-3"
+                          >
                             <div className="flex items-center gap-3">
-                              <Badge variant="outline" className="font-mono">
+                              <Badge
+                                variant="outline"
+                                className="font-mono"
+                              >
                                 {field.value}
                               </Badge>
                               <span className="font-medium">{field.field}</span>
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger>
-                                    <Info className="h-4 w-4 text-gray-400" />
+                                    <Info className="h-4 w-4" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>{field.description}</p>
@@ -203,7 +331,7 @@ export default function Home() {
                                 </Tooltip>
                               </TooltipProvider>
                             </div>
-                            <span className="text-gray-600">{field.description}</span>
+                            <span>{field.description}</span>
                           </div>
                         ))}
                       </div>
@@ -211,25 +339,48 @@ export default function Home() {
 
                     {/* Human Readable */}
                     <div>
-                      <h4 className="font-semibold mb-2 text-gray-900">Human-Readable Summary</h4>
-                      <p className="text-lg font-medium text-purple-600 bg-purple-50 p-4 rounded-lg">
+                      <h4 className="text-foreground mb-2 font-semibold">Human-Readable Summary</h4>
+                      <p className="rounded-lg bg-purple-50 p-4 text-lg font-medium text-purple-600 dark:bg-purple-900/20 dark:text-purple-300">
                         {parsedResult.humanReadable}
                       </p>
                     </div>
 
                     {/* Next Run Times */}
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-gray-900">Next Run Times</h4>
-                        <Button variant="link" className="text-green-500 p-0">
-                          Change Timezone ({timezone})
-                        </Button>
+                      <div className="mb-3 flex items-center justify-between">
+                        <h4 className="text-foreground font-semibold">Next Run Times</h4>
+
+                        {/* TODO: Handle timezone and DST*/}
+                        {/* <Select
+                          value={timezone}
+                          onValueChange={(value) => setTimezone(value)}
+                          open={showTimezoneDropdown}
+                          onOpenChange={setShowTimezoneDropdown}
+                        >
+                          <SelectTrigger className="hover:bg-accent text-primary border-0 bg-transparent py-2 font-medium shadow-none">
+                            <SelectValue>Change Timezone ({timezone})</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover text-popover-foreground z-50 overflow-y-auto">
+                            {timeZoneOptions.map((tz) => (
+                              <SelectItem
+                                key={tz.value}
+                                value={tz.value}
+                                className="text-foreground"
+                              >
+                                {tz.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select> */}
                       </div>
                       <div className="space-y-2">
-                        {parsedResult.nextRuns.map((time: string, index: number) => (
-                          <div key={index} className="flex items-center gap-3 p-2 bg-green-50 rounded">
-                            <Calendar className="h-4 w-4 text-green-500" />
-                            <span className="font-mono text-sm">{time}</span>
+                        {parsedResult.nextRuns?.map((time: string, index: number) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 rounded bg-green-50 p-2 dark:bg-green-900/20"
+                          >
+                            <Calendar className="text-primary h-4 w-4" />
+                            <span className="text-foreground font-mono text-sm">{time}</span>
                           </div>
                         ))}
                       </div>
@@ -243,50 +394,92 @@ export default function Home() {
       </section>
 
       {/* Learn More Section */}
-      <section id="learn" className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-3xl font-bold text-center text-gray-900 mb-8">Cron Cheatsheet</h3>
+      <section
+        id="learn"
+        className="bg-background px-4 py-16 transition-colors sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-4xl">
+          <h3 className="text-foreground mb-8 text-center text-3xl font-bold">Cron Cheatsheet</h3>
 
-          <Tabs defaultValue="basics" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 gap-2 border-2 h-auto sm:grid-cols-4">
+          <Tabs
+            defaultValue="basics"
+            className="w-full"
+          >
+            <TabsList className="border-border bg-accent grid h-auto w-full grid-cols-2 gap-2 border-2 sm:grid-cols-4">
               <TabsTrigger value="basics">Basics</TabsTrigger>
               <TabsTrigger value="special">Special Characters</TabsTrigger>
               <TabsTrigger value="examples">Examples</TabsTrigger>
               <TabsTrigger value="mistakes">Common Mistakes</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="basics" className="mt-6">
-              <Card>
+            <TabsContent
+              value="basics"
+              className="mt-6"
+            >
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <Hash className="h-5 w-5 text-green-500 mt-0.5" />
+                      <Hash className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
                         <p className="font-medium">
-                          Cron format:{" "}
-                          <code className="bg-gray-100 px-2 py-1 rounded font-mono">minute hour day month weekday</code>
+                          Cron format:{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            minute hour day month weekday
+                          </code>
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Star className="h-5 w-5 text-green-500 mt-0.5" />
+                      <Box className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
                         <p className="font-medium">
-                          Fields range from 0-59 (minutes), 0-23 (hours), 1-31 (days), 1-12 (months), 0-7 (weekdays)
+                          Some systems (Quartz, Spring, etc.) support 6 fields with{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            seconds
+                          </code>{' '}
+                          at the start
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Clock className="h-5 w-5 text-green-500 mt-0.5" />
+                      <Star className="mt-0.5 h-5 w-5 text-green-500" />
+                      <div>
+                        <p className="font-medium">Fields ranges:</p>
+                        <ul
+                          role="list"
+                          className="mt-2 list-disc space-y-1 pl-5 text-sm marker:text-gray-400"
+                        >
+                          <li>
+                            Seconds: 0–59 <span className="italic">(if supported)</span>
+                          </li>
+                          <li>Minutes: 0–59</li>
+                          <li>Hours: 0–23</li>
+                          <li>Day of Month: 1–31</li>
+                          <li>
+                            Month: 1–12 <span className="italic">(or JAN–DEC)</span>
+                          </li>
+                          <li>
+                            Day of Week: 0–7{' '}
+                            <span className="italic">(0 and 7 = Sunday, or SUN–SAT)</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
                         <p className="font-medium">
-                          Use <code className="bg-gray-100 px-2 py-1 rounded font-mono">*</code> to match any value in
-                          that field
+                          Use{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            *
+                          </code>{' '}
+                          to match any value in that field
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Calendar className="h-5 w-5 text-green-500 mt-0.5" />
+                      <Calendar className="mt-0.5 h-5 w-5 text-green-500" />
                       <div>
                         <p className="font-medium">Sunday can be represented as either 0 or 7</p>
                       </div>
@@ -296,37 +489,90 @@ export default function Home() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="special" className="mt-6">
-              <Card>
+            <TabsContent
+              value="special"
+              className="mt-6"
+            >
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">*</div>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        *
+                      </code>
                       <div>
                         <p className="font-medium">Matches any value (wildcard)</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">/</div>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        /
+                      </code>
                       <div>
                         <p className="font-medium">
-                          Step values - <code className="font-mono">*/5</code> means every 5 units
+                          Step values -{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            */5
+                          </code>{' '}
+                          means every 5 units
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">-</div>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        -
+                      </code>
                       <div>
                         <p className="font-medium">
-                          Range - <code className="font-mono">1-5</code> means 1 through 5
+                          Range -{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            1-5
+                          </code>{' '}
+                          means 1 through 5
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">,</div>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        ,
+                      </code>
                       <div>
                         <p className="font-medium">
-                          List - <code className="font-mono">1,3,5</code> means 1, 3, and 5
+                          List -{' '}
+                          <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                            1,3,5
+                          </code>{' '}
+                          means 1, 3, and 5
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        ?
+                      </code>
+                      <div>
+                        <p className="font-medium">
+                          “no specific value” (only in Quartz, for day/month fields)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        L
+                      </code>
+                      <div>
+                        <p className="font-medium">
+                          “last” (e.g. last day of month, or last weekday)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        #
+                      </code>
+                      <div>
+                        <p className="font-medium">
+                          “nth weekday” (e.g. 2#1 = first Monday of the month)
                         </p>
                       </div>
                     </div>
@@ -335,32 +581,59 @@ export default function Home() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="examples" className="mt-6">
-              <Card>
+            <TabsContent
+              value="examples"
+              className="mt-6"
+            >
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">0 0 * * *</code>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        0 0 * * *
+                      </code>
                       <div>
                         <p className="font-medium">Every day at midnight</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">*/15 * * * *</code>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        */15 * * * *
+                      </code>
                       <div>
                         <p className="font-medium">Every 15 minutes</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">0 9 * * MON-FRI</code>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        0 9 * * MON-FRI
+                      </code>
                       <div>
                         <p className="font-medium">9 AM on weekdays</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <code className="bg-gray-100 px-2 py-1 rounded font-mono text-sm">0 0 1 * *</code>
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        0 0 1 * *
+                      </code>
                       <div>
                         <p className="font-medium">First day of every month at midnight</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        0 0 12 25 12
+                      </code>
+                      <div>
+                        <p className="font-medium">Every Christman at noon</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <code className="bg-accent rounded border px-2 py-1 font-mono text-sm">
+                        0 */10 * * * *
+                      </code>
+                      <div>
+                        <p className="font-medium">Every 10 minutes at 0 seconds (if supported)</p>
                       </div>
                     </div>
                   </div>
@@ -368,36 +641,65 @@ export default function Home() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="mistakes" className="mt-6">
-              <Card>
+            <TabsContent
+              value="mistakes"
+              className="mt-6"
+            >
+              <Card className="bg-card shadow-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
                         <p className="font-medium">
-                          Don't use both day-of-month and day-of-week unless you want OR logic
+                          Using both day-of-month and day-of-week: it’s OR logic, not AND
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
+                      <div>
+                        <p className="font-medium">Forgetting that months are 1–12, not 0–11</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
                         <p className="font-medium">
-                          Remember that months are 1-12, not 0-11 like in some programming languages
+                          Confusing Sunday as 0 vs 7 (both are valid in many systems)
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium">Be careful with timezone differences in production environments</p>
+                        <p className="font-medium">
+                          Assuming all systems support seconds (many only use 5 fields)
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
                       <div>
-                        <p className="font-medium">Test your cron expressions before deploying to production</p>
+                        <p className="font-medium">
+                          Not accounting for <b>timezone differences</b> in production
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
+                      <div>
+                        <p className="font-medium">
+                          Forgetting DST changes if you schedule in a local timezone
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-destructive mt-2 h-2 w-2 rounded-full"></div>
+                      <div>
+                        <p className="font-medium">
+                          Not testing your cron expression before deploying
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -407,6 +709,80 @@ export default function Home() {
           </Tabs>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-border bg-background border-t px-4 py-12 font-sans transition-colors sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {/* Project Info */}
+            <div>
+              <h4 className="text-foreground mb-4 font-mono text-lg font-bold">WhatTheCron</h4>
+              <p className="text-muted-foreground mb-4 text-sm font-medium">
+                Because remembering cron syntax is harder than writing it.
+              </p>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h5 className="text-foreground mb-4 font-semibold">Links</h5>
+              <div className="space-y-3">
+                <Link
+                  href="https://github.com/de7ign/whatthecron"
+                  target="_blank"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
+                >
+                  GitHub Repository
+                </Link>
+                <Link
+                  target="_blank"
+                  href="https://github.com/de7ign/whatthecron/issues"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
+                >
+                  Report Issues
+                </Link>
+                <Link
+                  target="_blank"
+                  href="https://github.com/de7ign/whatthecron/issues"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
+                >
+                  Feature Requests
+                </Link>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h5 className="text-foreground mb-4 font-semibold">Connect</h5>
+              <div className="space-y-3">
+                <Link
+                  target="_blank"
+                  href="https://github.com/de7ign"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
+                >
+                  GitHub Profile
+                </Link>
+                <Link
+                  target="_blank"
+                  href="https://x.com/dzndev"
+                  className="text-muted-foreground hover:text-foreground block text-sm"
+                >
+                  Twitter/X
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-border mt-8 border-t pt-8 text-center">
+            <Link
+              className="text-muted-foreground hover:text-foreground text-sm"
+              target="_blank"
+              href="https://github.com/de7ign/whatthecron"
+            >
+              Like this project? Support it by ⭐ing on GitHub or submitting your suggestions
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
-  )
+  );
 }
