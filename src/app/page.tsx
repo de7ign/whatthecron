@@ -11,6 +11,7 @@ import { Box, Calendar, Clock, Github, Hash, Info, Moon, Star, Sun, Zap } from '
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ExplodingHead from '@/components/ui/exploding-head';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -235,7 +236,12 @@ export default function Home() {
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-foreground mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
             Ever looked at a cron job and thought…{' '}
-            <span className="text-purple-500">what the cron?</span> 🤯
+            <span className="text-purple-500">what the cron?</span>{' '}
+            <ExplodingHead
+              width="1.1em"
+              height="1.1em"
+              className="inline-block align-text-bottom"
+            />
           </h2>
           <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
             Instantly decode, explain, and preview your cron schedules.
