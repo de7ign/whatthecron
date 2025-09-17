@@ -11,14 +11,8 @@ import { Box, Calendar, Clock, Github, Hash, Info, Moon, Star, Sun, Zap } from '
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ExplodingHead from '@/components/ui/exploding-head';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -195,8 +189,16 @@ export default function Home() {
       <header className="border-border bg-background sticky top-0 z-50 border-b shadow-sm transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
               <h1 className="text-foreground font-mono text-2xl font-bold">WhatTheCron</h1>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-purple-500">Beta</Badge>
+                </TooltipTrigger>
+                <TooltipContent className="bg-background text-foreground max-w-xs border text-wrap">
+                  🧪 Beta — Still cooking! Got bugs or feature ideas? Drop them on GitHub.
+                </TooltipContent>
+              </Tooltip>
             </div>
             <nav className="flex items-center space-x-6">
               {mounted && (
@@ -234,7 +236,12 @@ export default function Home() {
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-foreground mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
             Ever looked at a cron job and thought…{' '}
-            <span className="text-purple-500">what the cron?</span> 🤯
+            <span className="text-purple-500">what the cron?</span>{' '}
+            <ExplodingHead
+              width="1.1em"
+              height="1.1em"
+              className="inline-block align-text-bottom"
+            />
           </h2>
           <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
             Instantly decode, explain, and preview your cron schedules.
