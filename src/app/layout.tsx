@@ -42,6 +42,14 @@ export const metadata: Metadata = {
       'Translate, validate, and visualize your CRON schedules instantly. Open-source developer tool.',
     url: baseUrl,
     siteName: 'WhatTheCron',
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`, // replace with actual image
+        width: 1200,
+        height: 630,
+        alt: "WhatTheCron preview",
+      },
+    ],
     locale: 'en_US',
     type: 'website',
   },
@@ -50,6 +58,7 @@ export const metadata: Metadata = {
     title: 'WhatTheCron – Understand your CRON expressions instantly',
     description:
       'An open-source tool for developers to easily understand and validate CRON expressions.',
+    images: [`${baseUrl}/og-image.png`],
     creator: '@dzndev',
   },
   robots: {
