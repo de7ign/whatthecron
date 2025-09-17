@@ -12,13 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -195,8 +188,16 @@ export default function Home() {
       <header className="border-border bg-background sticky top-0 z-50 border-b shadow-sm transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
               <h1 className="text-foreground font-mono text-2xl font-bold">WhatTheCron</h1>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-purple-500">Beta</Badge>
+                </TooltipTrigger>
+                <TooltipContent className="bg-background text-foreground max-w-xs border text-wrap">
+                  🧪 Beta — Still cooking! Got bugs or feature ideas? Drop them on GitHub.
+                </TooltipContent>
+              </Tooltip>
             </div>
             <nav className="flex items-center space-x-6">
               {mounted && (
