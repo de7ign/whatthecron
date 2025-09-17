@@ -47,7 +47,7 @@ export const metadata: Metadata = {
         url: `${baseUrl}/og-image.png`, // replace with actual image
         width: 1200,
         height: 630,
-        alt: "WhatTheCron preview",
+        alt: 'WhatTheCron preview',
       },
     ],
     locale: 'en_US',

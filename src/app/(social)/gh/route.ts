@@ -1,3 +1,3 @@
-import { createSocialRoute } from "../lib/utils";
+import { createSocialRoute } from '../lib/utils';
 
-export const { GET } = { GET: createSocialRoute("github") };
+export const { GET } = { GET: createSocialRoute('github') };
