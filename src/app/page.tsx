@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { getTimeZones, TimeZone } from '@vvo/tzdb';
 import { CronExpression, CronExpressionParser } from 'cron-parser';
 import cronstrue from 'cronstrue';
-import { Box, Calendar, Clock, Github, Hash, Info, Moon, Star, Sun, Zap } from 'lucide-react';
+import { Box, Calendar, Clock, Hash, Info, Star, Zap } from 'lucide-react';
 
+import Header from '@/components/header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,13 +34,6 @@ export default function Home() {
   const [parsedResult, setParsedResult] = useState<ParsedResult | undefined>(undefined);
   const [showTimezoneDropdown, setShowTimezoneDropdown] = useState(false);
   const [timezone, setTimezone] = useState(getDefaultTimeZone());
-  const { resolvedTheme, setTheme } = useTheme();
-
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -186,50 +179,7 @@ export default function Home() {
   return (
     <div className="bg-background min-h-screen transition-colors">
       {/* Header */}
-      <header className="border-border bg-background sticky top-0 z-50 border-b shadow-sm transition-colors">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-foreground font-mono text-2xl font-bold">WhatTheCron</h1>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge className="bg-purple-500">Beta</Badge>
-                </TooltipTrigger>
-                <TooltipContent className="bg-background text-foreground max-w-xs border text-wrap">
-                  🧪 Beta — Still cooking! Got bugs or feature ideas? Drop them on GitHub.
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <nav className="flex items-center space-x-6">
-              {mounted && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                >
-                  {resolvedTheme === 'dark' ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </Button>
-              )}
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-              >
-                <Link
-                  href="https://github.com/de7ign/whatthecron"
-                  target="_blank"
-                >
-                  <Github className="h-5 w-5" />
-                </Link>
-              </Button>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
