@@ -25,7 +25,7 @@ export default function Header() {
             <h1 className="text-foreground font-mono text-2xl font-bold">WhatTheCron</h1>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge className="bg-purple-500">Beta</Badge>
+                <Badge className="bg-purple-500 text-black">Beta</Badge>
               </TooltipTrigger>
               <TooltipContent className="bg-background text-foreground max-w-xs border text-wrap">
                 🧪 Beta — Still cooking! Got bugs or feature ideas? Drop them on GitHub.
@@ -37,6 +37,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label="Toggle Theme"
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               >
                 {resolvedTheme === 'dark' ? (
@@ -51,12 +52,13 @@ export default function Header() {
               variant="ghost"
               size="sm"
             >
-              <Link
+              <a
                 href="https://github.com/de7ign/whatthecron"
                 target="_blank"
+                aria-label="View source on GitHub"
               >
                 <Github className="h-5 w-5" />
-              </Link>
+              </a>
             </Button>
           </nav>
         </div>
