@@ -9,7 +9,7 @@ Yeah, same.
 **WhatTheCron** is a clean, modern, mildly dramatic visualizer + explainer for your cryptic cron schedules.  
 No BS. Just type it in, and instantly see **what’s going on**.
 
-[🚀 Try it live](https://whatthecron.vercel.app?utm_source=github&utm_medium=repo-readme)
+[🚀 Try it live](https://www.whatthecron.dev?utm_source=github&utm_medium=repo-readme)
 
 ---
 

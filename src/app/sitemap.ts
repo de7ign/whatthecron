@@ -1,4 +1,4 @@
-export const baseUrl = 'https://whatthecron.vercel.app';
+export const baseUrl = 'https://www.whatthecron.dev';
 
 const buildDate = new Date().toISOString().split('T')[0];
 
